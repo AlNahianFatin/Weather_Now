@@ -28,6 +28,7 @@ Weather Now is a sleek and intuitive web application designed to deliver current
 -   ⚡ **Fast & Efficient**: Built with Next.js for optimized performance, server-side rendering (SSR), and static site generation (SSG) capabilities.
 -   🎨 **Modern UI**: A clean and aesthetically pleasing user interface powered by Tailwind CSS.
 -   🛡️ **Type-Safe Development**: Enhanced code reliability and maintainability with TypeScript.
+-   🔒 **Rate Limiting Technology**: Restricted users based on IP address from spamming and burning 3rd-party API token.
 
 
 ## 🛠️ Tech Stack
@@ -43,6 +44,8 @@ Weather Now is a sleek and intuitive web application designed to deliver current
 ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
 ![ESLint](https://img.shields.io/badge/ESLint-4B3263?style=for-the-badge&logo=eslint&logoColor=white)
+
+![rate-limiter-flexible](https://img.shields.io/badge/rate--limiter--flexible-Rate%20Limiting-orange?style=for-the-badge)
 
 **Tools:**
 
