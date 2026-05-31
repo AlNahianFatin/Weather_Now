@@ -31,9 +31,8 @@ export default function ForecastWeatherDetail(props: ForecastWeatherDetail) {
         <Container className="gap-4">
             {/* left */}
             <section className="flex gap-4 items-center px-4">
-                <div>
-                    <WeatherIcon iconname="{weatherIcon}" />
-                    <p>{date}</p>
+                <div className="flex flex-col items-center gap-1">
+                    <WeatherIcon iconname={weatherIcon} />                    <p>{date}</p>
                     <p className="text-sm">{day}</p>
                 </div>
 
@@ -49,7 +48,7 @@ export default function ForecastWeatherDetail(props: ForecastWeatherDetail) {
 
             {/* right */}
             <section className="overflow-x-auto flex justify-between gap-4 px-4 w-full pr-10">
-            <WeatherDetails {...props} />
+                <WeatherDetails {...props} />
             </section>
         </Container>
     );

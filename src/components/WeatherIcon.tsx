@@ -2,8 +2,6 @@ import React from 'react';
 import Image from'next/image';
 import { cn } from '../utils/cn';
 
-type Props = {};
-
 export default function WeatherIcon(props: React.HTMLProps<HTMLDivElement> & {iconname: string}) {
     return (
         <div {...props} className={cn('relative h-20 w-20')}>

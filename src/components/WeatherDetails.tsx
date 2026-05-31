@@ -9,8 +9,8 @@ export interface WeatherDetailProps {
     humidity: string;
     windSpeed: string;
     airPressure: string;
-    sunrise: string;
-    sunset: string;
+    sunrise?: string;
+    sunset?: string;
 }
 
 export default function WeatherDetails(props: WeatherDetailProps) {
@@ -19,8 +19,8 @@ export default function WeatherDetails(props: WeatherDetailProps) {
         humidity = "61%",
         windSpeed = "7 km/h",
         airPressure = "1012 hPa",
-        sunrise = "6.20",
-        sunset = "18:48"
+        sunrise,
+        sunset
     } = props;
 
     return (
@@ -29,8 +29,12 @@ export default function WeatherDetails(props: WeatherDetailProps) {
             <SingleWeatherDetail icon={<FiDroplet />} information="humidity" value={humidity} />
             <SingleWeatherDetail icon={<MdAir />} information="windSpeed" value={windSpeed} />
             <SingleWeatherDetail icon={<ImMeter />} information="airPressure" value={airPressure} />
-            <SingleWeatherDetail icon={<LuSunrise />} information="sunrise" value={sunrise} />
-            <SingleWeatherDetail icon={<LuSunset />} information="sunset" value={sunset} />
+            {sunrise && sunset && (
+                <>
+                    <SingleWeatherDetail icon={<LuSunrise />} information="sunrise" value={sunrise} />
+                    <SingleWeatherDetail icon={<LuSunset />} information="sunset" value={sunset} />
+                </>
+            )}
         </>
     );
 }
