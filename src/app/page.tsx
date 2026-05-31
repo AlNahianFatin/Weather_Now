@@ -2,7 +2,6 @@
 
 import NavBar from "../components/NavBar";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { format, fromUnixTime, parseISO } from "date-fns";
 import Container from "../components/Container";
 import { convertKelvinToCelsius } from "../utils/convertKelvinToCelsius";
@@ -14,7 +13,7 @@ import { convertWindSpeed } from "../utils/convertWindSpeed";
 import ForecastWeatherDetail from "../components/ForecastWeatherDetail";
 import { loadingCityAtom, placeAtom } from "./atom";
 import { useAtom } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import WeatherSkeleton from "../components/SkeletonLoading";
 
 type WeatherData = {
@@ -73,25 +72,59 @@ type WeatherData = {
   };
 };
 
+type ErrorWithRetry = Error & { retryAfter?: number; rateLimited?: boolean };
+
 export default function Home() {
   const [place, setPlace] = useAtom(placeAtom);
   const [loadingCity, setLoadingCity] = useAtom(loadingCityAtom);
+  const [countdown, setCountdown] = useState<number>(0);
 
-  const { isPending, data, refetch } = useQuery<WeatherData>({
-    queryKey: ['repoData'],
+  const { isPending, data, error, refetch } = useQuery<WeatherData, ErrorWithRetry>({
+    queryKey: ['repoData', place],
     queryFn: async () => {
-      const { data } = await axios.get(`https://api.openweathermap.org/data/2.5/forecast?q=${place}&appid=${process.env.NEXT_PUBLIC_WEATHER_KEY}`);
-      return data;
-    }
+      const response = await fetch(`/api/weather?place=${encodeURIComponent(place)}`);
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        const error = new Error(responseData.error || 'Failed to fetch weather data') as ErrorWithRetry;
+        error.retryAfter = responseData.retryAfter;
+        error.rateLimited = responseData.rateLimited;
+        throw error;
+      }
+      return responseData;
+    },
+    enabled: !!place && !loadingCity && countdown === 0,
+    retry: false,
   });
+
+  // Countdown timer effect - ONLY for rate limit errors
+  useEffect(() => {
+    if (error && (error as ErrorWithRetry).rateLimited && (error as ErrorWithRetry).retryAfter) {
+      setCountdown((error as ErrorWithRetry).retryAfter || 60);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (countdown <= 0) return;
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [countdown]);
 
   useEffect(() => {
     refetch();
   }, [place, refetch]);
 
   const firstData = data?.list[0];
-
-  // console.log("Weather data:", data);
 
   const uniqueDates = [
     ...new Set(
@@ -101,7 +134,6 @@ export default function Home() {
     )
   ];
 
-  // Filtering data to get the first entry after 6 AM for each unique date
   const firstDataForEachDate = uniqueDates.map((date) => {
     return data?.list.find((entry) => {
       const enrtyDate = new Date(entry.dt * 1000).toISOString().split("T")[0];
@@ -115,14 +147,43 @@ export default function Home() {
       <div className="flex items-center min-h-screen justify-center">
         <p className="animate-bounce">Loading...</p>
       </div>
-    )
+    );
+  }
+
+  if (error) {
+    const isRateLimited = (error as ErrorWithRetry).rateLimited === true;
+
+    return (
+      <div className="flex flex-col gap-4 bg-gray-100 min-h-screen">
+        <NavBar location={undefined} />
+        <main className="px-3 max-w-7xl mx-auto flex flex-col gap-9 w-full pb-10 pt-4">
+          <div className="flex flex-col items-center justify-center gap-6 py-16">
+            <div className="bg-red-100 border border-red-400 rounded-lg p-8 max-w-md">
+              <h2 className="text-2xl font-bold text-red-800 mb-3">
+                {isRateLimited ? '⏱️ Too Many Requests' : 'Unable to Fetch Weather'}
+              </h2>
+              <p className="text-red-700 mb-4">
+                {error.message}
+              </p>
+
+              {isRateLimited && countdown > 0 && (
+                <div className="mb-4 p-3 bg-red-200 rounded">
+                  <p className="text-sm font-semibold text-red-900">
+                    Try again in: <span className="text-lg font-bold">{countdown}s</span>
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col gap-4 bg-gray-100 min-h-screen">
       <NavBar location={data?.city.name} />
       <main className="px-3 max-w-7xl mx-auto flex flex-col gap-9 w-full pb-10 pt-4">
-        {/* today's data */}
         {loadingCity ? <WeatherSkeleton /> : (
           <>
             <section className="space-y-4">
@@ -132,7 +193,6 @@ export default function Home() {
                   <p className="text-lg">({format(parseISO(firstData?.dt_txt ?? ''), 'dd.MM.yyyy')})</p>
                 </h2>
                 <Container className="gap-10 px-6 items-center mt-4">
-                  {/* temperature */}
                   <div className="flex flex-col px-4">
                     <span className="text-5xl">
                       {convertKelvinToCelsius(firstData?.main.temp ?? 303.15)}°
@@ -147,13 +207,11 @@ export default function Home() {
                       <span>
                         {convertKelvinToCelsius(firstData?.main.temp_min ?? 303.15)}°↓ {" "}
                       </span>
-
                       <span>
                         {convertKelvinToCelsius(firstData?.main.temp_max ?? 303.15)}°↑ {" "}
                       </span>
                     </p>
                   </div>
-                  {/* time and weather icon */}
                   <div className="flex gap-10 sm:gap-16 overflow-x-auto w-full justify-between pr-3">
                     {data?.list.map((d, i) => (
                       <div key={i} className="flex flex-col justify-between gap-2 items-center text-xs font-semibold">
@@ -167,13 +225,11 @@ export default function Home() {
               </div>
 
               <div className="flex gap-4">
-                {/* left */}
                 <Container className="w-fit justify-center flex-col px-4 items-center">
                   <p className="capitalize text-center">{firstData?.weather[0].description}</p>
                   <WeatherIcon iconname={getDayOrNightIcon(firstData?.weather[0].icon ?? "Could not get icon", firstData?.dt ?? 1778886966)} />
                 </Container>
 
-                {/* right */}
                 <Container className="bg-yellow-300/80 px-6 gap-4 justify-between overflow-x-auto">
                   <WeatherDetails
                     visibility={metersToKilometers(firstData?.visibility ?? 10000)}
@@ -186,7 +242,6 @@ export default function Home() {
               </div>
             </section>
 
-            {/* upcoming 5 days' data */}
             <section className="flex w-full flex-col gap-4">
               <p className="text-2xl">Forecast (5 days)</p>
               {firstDataForEachDate
