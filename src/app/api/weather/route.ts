@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
-import { rateLimiter } from '../../../utils/rate-limiter';
+import { rateLimiter } from '../../../utils/rateLimiter';
 import { getUserIP } from '../../../utils/ip';
 
 export async function GET(request: NextRequest) {
