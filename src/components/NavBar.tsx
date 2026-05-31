@@ -92,8 +92,9 @@ export default function NavBar({ location }: Props) {
             <nav className="shadow-sm sticky top-0 left-0 z-50 bg-white">
                 <div className="h-[4em] w-full flex justify-between items-center max-w-7xl px-3 mx-auto">
                     <p className="flex items-center justify-center gap-2">
-                        <span className="text-gray-500 text-3xl">Weather</span>
-                        <MdWbSunny className="text-3xl mt-1 text-yellow-300" />
+                        <span className="text-gray-500 text-3xl">Weather Now</span>
+                        <MdWbSunny className="text-3xl mt-1 text-yellow-300" /> <br/>
+                        <span className="text-gray-500 text-1xl">Created by AL NAHIAN FATIN</span>
                     </p>
                     <section className="flex gap-2 items-center">
                         <MdMyLocation
