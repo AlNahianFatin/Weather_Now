@@ -1,4 +1,4 @@
-# 🚀 Weather_Now
+# 🚀 Weather Now
 
 <div align="center">
 
@@ -18,7 +18,7 @@
 
 ## 📖 Overview
 
-Weather_Now is a sleek and intuitive web application designed to deliver current weather conditions and forecasts. Leveraging the power of Next.js for a fast and efficient user experience, React for a dynamic interface, and Tailwind CSS for utility-first styling, this project offers a seamless way to stay informed about the weather in any location. It's built with modern web development best practices, including TypeScript for type safety and ESLint for code quality.
+Weather Now is a sleek and intuitive web application designed to deliver current weather conditions and forecasts. Leveraging the power of Next.js for a fast and efficient user experience, React for a dynamic interface, and Tailwind CSS for utility-first styling, this project offers a seamless way to stay informed about the weather in any location. It's built with modern web development best practices, including TypeScript for type safety and ESLint for code quality.
 
 ## ✨ Features
 
